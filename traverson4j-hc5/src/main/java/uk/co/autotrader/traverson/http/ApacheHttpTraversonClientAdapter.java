@@ -37,7 +37,7 @@ public class ApacheHttpTraversonClientAdapter implements TraversonClient {
     }
 
     @Override
-    public <T> Response<T> execute(Request request, Class<T> returnType) {
+    public <T> T execute(Request request, ResponseHandler<T> responseHandler) {
         ClassicHttpRequest httpRequest = apacheHttpUriConverter.toRequest(request);
 
         HttpClientContext clientContext = HttpClientContext.create();
@@ -53,7 +53,8 @@ public class ApacheHttpTraversonClientAdapter implements TraversonClient {
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = adapterClient.execute(httpRequest, clientContext);
-            return apacheHttpUriConverter.toResponse(httpResponse, httpRequest, returnType);
+            var response = apacheHttpUriConverter.toResponse(httpResponse, httpRequest);
+            return responseHandler.handle(response);
         } catch (IOException e) {
             throw new HttpException("Error with httpClient", e);
         } finally {

@@ -47,8 +47,8 @@ public class ApacheHttpUriConverter {
     }
 
 
-    public <T> Response<T> toResponse(CloseableHttpResponse httpResponse, HttpRequest httpRequest, Class<T> returnType) throws IOException {
-        Response<T> response = new Response<T>();
+    public Response toResponse(CloseableHttpResponse httpResponse, HttpRequest httpRequest) throws IOException {
+        Response response = new Response(conversionService);
         try {
             response.setUri(httpRequest.getUri());
         } catch (URISyntaxException e) {
@@ -61,7 +61,7 @@ public class ApacheHttpUriConverter {
 
         HttpEntity httpEntity = httpResponse.getEntity();
         if (httpEntity != null) {
-            response.setResource(conversionService.convert(httpEntity.getContent(), returnType));
+            response.setResourceStream(httpEntity.getContent());
         }
         return response;
     }

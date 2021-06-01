@@ -143,7 +143,7 @@ public class ApacheHttpUriConverterTest {
         when(httpResponse.getHeaders()).thenReturn(new Header[]{new BasicHeader("Location", "http://localhost/new")});
 
 
-        Response<String> response = apacheHttpUriConverter.toResponse(httpResponse, request, String.class);
+        Response response = apacheHttpUriConverter.toResponse(httpResponse, request);
 
         assertThat(response).isNotNull();
         assertThat(response.getUri()).isEqualTo(requestUri);
@@ -166,9 +166,9 @@ public class ApacheHttpUriConverterTest {
         when(httpResponse.getCode()).thenReturn(202);
         when(httpResponse.getHeaders()).thenReturn(new Header[0]);
 
-        Response<String> response = apacheHttpUriConverter.toResponse(httpResponse, request, String.class);
+        Response response = apacheHttpUriConverter.toResponse(httpResponse, request);
 
-        assertThat(response.getResource()).isEqualTo(expectedJson);
+        assertThat(response.getResource(String.class)).isEqualTo(expectedJson);
     }
 
     @Test
@@ -176,7 +176,7 @@ public class ApacheHttpUriConverterTest {
         HttpRequest request =  mock(HttpRequest.class);
         when(request.getUri()).thenThrow(URISyntaxException.class);
 
-        assertThatThrownBy(() -> apacheHttpUriConverter.toResponse(httpResponse, request, String.class))
+        assertThatThrownBy(() -> apacheHttpUriConverter.toResponse(httpResponse, request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("The http request contains an invalid URI")
                 .hasCauseInstanceOf(URISyntaxException.class);

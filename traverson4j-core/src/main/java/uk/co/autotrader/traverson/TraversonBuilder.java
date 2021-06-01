@@ -138,22 +138,8 @@ public class TraversonBuilder {
      * @throws uk.co.autotrader.traverson.exception.IllegalHttpStatusException When a non 2xx response is returned part way through traversing
      * @throws uk.co.autotrader.traverson.exception.HttpException When the underlying http client experiences an issue with a request. This could be an intermittent issue
      */
-    public Response<JSONObject> get() {
-        return get(JSONObject.class);
-    }
-
-    /**
-     * Navigate the path and get the response
-     *
-     * @param <T> the class type for Response
-     * @param returnType Class of return type.
-     * @return Response representing the http response and resource
-     * @throws uk.co.autotrader.traverson.exception.UnknownRelException When navigating a path, a given rel cannot be found
-     * @throws uk.co.autotrader.traverson.exception.IllegalHttpStatusException When a non 2xx response is returned part way through traversing
-     * @throws uk.co.autotrader.traverson.exception.HttpException When the underlying http client experiences an issue with a request. This could be an intermittent issue
-     */
-    public <T> Response<T> get(Class<T> returnType) {
-        return traverseAndPerform(Method.GET, null, returnType);
+    public <T> T get(ResponseHandler<T> responseHandler) {
+        return traverseAndPerform(Method.GET, null, responseHandler);
     }
 
     /**
@@ -164,50 +150,21 @@ public class TraversonBuilder {
      * @throws uk.co.autotrader.traverson.exception.IllegalHttpStatusException When a non 2xx response is returned part way through traversing
      * @throws uk.co.autotrader.traverson.exception.HttpException When the underlying http client experiences an issue with a request. This could be an intermittent issue
      */
-    public Response<JSONObject> delete() {
-        return traverseAndPerform(Method.DELETE, null, JSONObject.class);
-    }
-
-    /**
-     * Navigate the path and delete the resource
-     *
-     * @param <T> the class type for Response
-     * @param returnType Class of return type.
-     * @return Response representing the http response
-     * @throws uk.co.autotrader.traverson.exception.UnknownRelException When navigating a path, a given rel cannot be found
-     * @throws uk.co.autotrader.traverson.exception.IllegalHttpStatusException When a non 2xx response is returned part way through traversing
-     * @throws uk.co.autotrader.traverson.exception.HttpException When the underlying http client experiences an issue with a request. This could be an intermittent issue
-     */
-    public <T> Response<T> delete(Class<T> returnType) {
-        return traverseAndPerform(Method.DELETE, null, returnType);
+    public <T> T delete(ResponseHandler<T> responseHandler) {
+        return traverseAndPerform(Method.DELETE, null, responseHandler);
     }
 
     /**
      * Navigate the path and post the body to the resource
      *
      * @param body request body to send
-     * @return Response representing the http response
-     * @throws uk.co.autotrader.traverson.exception.UnknownRelException When navigating a path, a given rel cannot be found
-     * @throws uk.co.autotrader.traverson.exception.IllegalHttpStatusException When a non 2xx response is returned part way through traversing
-     * @throws uk.co.autotrader.traverson.exception.HttpException When the underlying http client experiences an issue with a request. This could be an intermittent issue
-     */
-    public Response<JSONObject> post(Body body) {
-        return traverseAndPerform(Method.POST, body, JSONObject.class);
-    }
-
-    /**
-     * Navigate the path and post the body to the resource
-     *
-     * @param body request body to send
-     * @param <T> the class type for Response
-     * @param returnType Class of return type.
      * @return Response representing the http response and resource
      * @throws uk.co.autotrader.traverson.exception.UnknownRelException When navigating a path, a given rel cannot be found
      * @throws uk.co.autotrader.traverson.exception.IllegalHttpStatusException When a non 2xx response is returned part way through traversing
      * @throws uk.co.autotrader.traverson.exception.HttpException When the underlying http client experiences an issue with a request. This could be an intermittent issue
      */
-    public <T> Response<T> post(Body body, Class<T> returnType) {
-        return traverseAndPerform(Method.POST, body, returnType);
+    public <T> T post(Body body, ResponseHandler<T> responseHandler) {
+        return traverseAndPerform(Method.POST, body, responseHandler);
     }
 
     /**
@@ -219,24 +176,8 @@ public class TraversonBuilder {
      * @throws uk.co.autotrader.traverson.exception.IllegalHttpStatusException When a non 2xx response is returned part way through traversing
      * @throws uk.co.autotrader.traverson.exception.HttpException When the underlying http client experiences an issue with a request. This could be an intermittent issue
      */
-    public Response<JSONObject> put(Body body) {
-        return traverseAndPerform(Method.PUT, body, JSONObject.class);
-    }
-
-
-    /**
-     * Navigate the path and put the body to the resource
-     *
-     * @param body request body to send
-     * @param <T> the class type for Response
-     * @param returnType Class of return type.
-     * @return Response representing the http response
-     * @throws uk.co.autotrader.traverson.exception.UnknownRelException When navigating a path, a given rel cannot be found
-     * @throws uk.co.autotrader.traverson.exception.IllegalHttpStatusException When a non 2xx response is returned part way through traversing
-     * @throws uk.co.autotrader.traverson.exception.HttpException When the underlying http client experiences an issue with a request. This could be an intermittent issue
-     */
-    public <T> Response<T> put(Body body, Class<T> returnType) {
-        return traverseAndPerform(Method.PUT, body, returnType);
+    public <T> T put(Body body, ResponseHandler<T> responseHandler) {
+        return traverseAndPerform(Method.PUT, body, responseHandler);
     }
 
     /**
@@ -248,38 +189,25 @@ public class TraversonBuilder {
      * @throws uk.co.autotrader.traverson.exception.IllegalHttpStatusException When a non 2xx response is returned part way through traversing
      * @throws uk.co.autotrader.traverson.exception.HttpException When the underlying http client experiences an issue with a request. This could be an intermittent issue
      */
-    public Response<JSONObject> patch(Body body) {
-        return traverseAndPerform(Method.PATCH, body, JSONObject.class);
+    public <T> T patch(Body body, ResponseHandler<T> responseHandler) {
+        return traverseAndPerform(Method.PATCH, body, responseHandler);
     }
 
-    /**
-     * Navigate the path and patch the body to the resource
-     *
-     * @param body request body to send
-     * @param <T> the class type for Response
-     * @param returnType Class of return type.
-     * @return Response representing the http response
-     * @throws uk.co.autotrader.traverson.exception.UnknownRelException When navigating a path, a given rel cannot be found
-     * @throws uk.co.autotrader.traverson.exception.IllegalHttpStatusException When a non 2xx response is returned part way through traversing
-     * @throws uk.co.autotrader.traverson.exception.HttpException When the underlying http client experiences an issue with a request. This could be an intermittent issue
-     */
-    public <T> Response<T> patch(Body body, Class<T> returnType) {
-        return traverseAndPerform(Method.PATCH, body, returnType);
-    }
-
-    private <T> Response<T> traverseAndPerform(Method terminalMethod, Body terminalBody, Class<T> returnType) {
+    private <T> T traverseAndPerform(Method terminalMethod, Body terminalBody, ResponseHandler<T> responseHandler) {
         while (!relsToFollow.isEmpty()) {
             request.setMethod(Method.GET);
-            Response<JSONObject> response = traversonClient.execute(request, JSONObject.class);
-            if (response.isSuccessful()) {
-                request.setUrl(linkDiscoverer.findHref(response.getResource(), relsToFollow.removeFirst()));
-            } else {
-                throw new IllegalHttpStatusException(response.getStatusCode(), response.getUri());
-            }
+            traversonClient.execute(request, response -> {
+                if (response.isSuccessful()) {
+                    request.setUrl(linkDiscoverer.findHref(response.getResource(JSONObject.class), relsToFollow.removeFirst()));
+                } else {
+                    throw new IllegalHttpStatusException(response.getStatusCode(), response.getUri());
+                }
+                return null;
+            });
         }
 
         request.setBody(terminalBody);
         request.setMethod(terminalMethod);
-        return traversonClient.execute(request, returnType);
+        return traversonClient.execute(request, responseHandler);
     }
 }

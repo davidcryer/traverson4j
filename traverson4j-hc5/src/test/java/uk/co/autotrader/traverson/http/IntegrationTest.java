@@ -41,11 +41,13 @@ public class IntegrationTest {
     public void requestBody_SimpleTextBodyIsSerializedAndPostedCorrectly() {
         wireMockServer.stubFor(patch(urlEqualTo("/records/1"))
                 .willReturn(WireMock.status(202)));
-        Response<JSONObject> response = traverson.from("http://localhost:8089/records/1")
-                .patch(new TextBody("{\"key\":123}", "application/json", StandardCharsets.UTF_8));
-
-        wireMockServer.verify(1, patchRequestedFor(urlEqualTo("/records/1")).withRequestBody(equalToJson("{\"key\":123}")));
-        assertThat(response.getStatusCode()).isEqualTo(202);
+        var didCheck = traverson.from("http://localhost:8089/records/1")
+                .patch(new TextBody("{\"key\":123}", "application/json", StandardCharsets.UTF_8), response -> {
+                    wireMockServer.verify(1, patchRequestedFor(urlEqualTo("/records/1")).withRequestBody(equalToJson("{\"key\":123}")));
+                    assertThat(response.getStatusCode()).isEqualTo(202);
+                    return true;
+                });
+        assertThat(didCheck).isTrue();
     }
 
     @Test
@@ -60,11 +62,13 @@ public class IntegrationTest {
                 .willReturn(WireMock.status(202)));
         SimpleMultipartBody.BodyPart bodyPart = new SimpleMultipartBody.BodyPart("my-body-part", data, "application/octet-stream", "my-file");
         SimpleMultipartBody multipartBody = new SimpleMultipartBody(bodyPart);
-        Response<JSONObject> response = traverson.from("http://localhost:8089/records")
-                .post(multipartBody);
-
-        wireMockServer.verify(1, postRequestedFor(urlEqualTo("/records")));
-        assertThat(response.getStatusCode()).isEqualTo(202);
+        var didCheck = traverson.from("http://localhost:8089/records")
+                .post(multipartBody, response -> {
+                    wireMockServer.verify(1, postRequestedFor(urlEqualTo("/records")));
+                    assertThat(response.getStatusCode()).isEqualTo(202);
+                    return true;
+                });
+        assertThat(didCheck).isTrue();
     }
 
     @Test
@@ -79,12 +83,14 @@ public class IntegrationTest {
                 .withBasicAuth("MyUsername", "MyPassword")
                 .willReturn(ok()));
 
-        Response<String> response = traverson.from("http://localhost:8089/restricted-area")
-                                            .withAuth("MyUsername", "MyPassword", "http://localhost:8089")
-                                            .get(String.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(200);
-        wireMockServer.verify(2, getRequestedFor(urlEqualTo("/restricted-area")));
+        var didCheck = traverson.from("http://localhost:8089/restricted-area")
+                .withAuth("MyUsername", "MyPassword", "http://localhost:8089")
+                .get(response -> {
+                    assertThat(response.getStatusCode()).isEqualTo(200);
+                    wireMockServer.verify(2, getRequestedFor(urlEqualTo("/restricted-area")));
+                    return true;
+                });
+        assertThat(didCheck).isTrue();
     }
 
     @Test
@@ -93,11 +99,26 @@ public class IntegrationTest {
                 .withBasicAuth("MyUsername", "MyPassword")
                 .willReturn(ok()));
 
-        Response<String> response = traverson.from("http://localhost:8089/restricted-area")
-                                            .withAuth("MyUsername", "MyPassword", "http://localhost:8089", true)
-                                            .get(String.class);
+        var didCheck = traverson.from("http://localhost:8089/restricted-area")
+                .withAuth("MyUsername", "MyPassword", "http://localhost:8089", true)
+                .get(response -> {
+                    assertThat(response.getStatusCode()).isEqualTo(200);
+                    wireMockServer.verify(1, getRequestedFor(urlEqualTo("/restricted-area")));
+                    return true;
+                });
+        assertThat(didCheck).isTrue();
+    }
 
-        assertThat(response.getStatusCode()).isEqualTo(200);
-        wireMockServer.verify(1, getRequestedFor(urlEqualTo("/restricted-area")));
+    @Test
+    public void requestBody_nonSuccessStatus_providesStringResponse() {
+        wireMockServer.stubFor(get(urlEqualTo("/path"))
+                .willReturn(WireMock.badRequest().withBody("error message")));
+        var didCheck = traverson.from("http://localhost:8089/path")
+                .get(response -> {
+                    wireMockServer.verify(1, getRequestedFor(urlEqualTo("/path")));
+                    assertThat(response.getResource(String.class)).isEqualTo("error message");
+                    return true;
+                });
+        assertThat(didCheck).isTrue();
     }
 }

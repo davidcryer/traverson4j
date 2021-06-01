@@ -1,14 +1,23 @@
 package uk.co.autotrader.traverson.http;
 
+import com.alibaba.fastjson.JSONObject;
+import uk.co.autotrader.traverson.conversion.ResourceConversionService;
+
+import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Response<T> {
+public class Response {
+    private final ResourceConversionService conversionService;
     private int statusCode;
     private URI uri;
-    private T resource;
+    private InputStream resourceStream;
     private Map<String, String> responseHeaders = new HashMap<String, String>();
+
+    public Response(ResourceConversionService conversionService) {
+        this.conversionService = conversionService;
+    }
 
     public int getStatusCode() {
         return statusCode;
@@ -26,12 +35,19 @@ public class Response<T> {
         this.uri = uri;
     }
 
-    public T getResource() {
-        return resource;
+    public <T> T getResource(Class<T> clazz) {
+        if (resourceStream == null) {
+            return null;
+        }
+        return conversionService.convert(resourceStream, clazz);
     }
 
-    public void setResource(T resource) {
-        this.resource = resource;
+    public JSONObject getResource() {
+        return getResource(JSONObject.class);
+    }
+
+    public void setResourceStream(InputStream resourceStream) {
+        this.resourceStream = resourceStream;
     }
 
     public Map<String, String> getResponseHeaders() {
