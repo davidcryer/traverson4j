@@ -1,6 +1,8 @@
 dependencies {
     api 'org.apache.httpcomponents.client5:httpclient5:5.0.3',
             'com.damnhandy:handy-uri-templates:2.1.2'
+    compileOnly 'org.projectlombok:lombok:1.18.20'
+    annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
     testImplementation "com.github.tomakehurst:wiremock-jre8:2.27.0"
 }

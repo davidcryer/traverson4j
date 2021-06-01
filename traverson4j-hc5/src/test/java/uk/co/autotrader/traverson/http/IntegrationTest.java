@@ -100,4 +100,16 @@ public class IntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(200);
         wireMockServer.verify(1, getRequestedFor(urlEqualTo("/restricted-area")));
     }
+
+    @Test
+    public void requestBody_nonSuccessStatus_providesStringResponse() {
+        wireMockServer.stubFor(get(urlEqualTo("/path"))
+                .willReturn(WireMock.badRequest().withBody("error message")));
+        Response<Integer> response = traverson.from("http://localhost:8089/path")
+                .get(Integer.class);
+
+        wireMockServer.verify(1, getRequestedFor(urlEqualTo("/path")));
+        assertThat(response.getResource()).isNull();
+        assertThat(response.getNonSuccessResource()).isEqualTo("error message");
+    }
 }
