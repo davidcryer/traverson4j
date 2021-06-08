@@ -1,10 +1,7 @@
 package uk.co.autotrader.traverson.http;
 
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.core5.http.ClassicHttpRequest;
-import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.*;
 import org.apache.hc.core5.http.message.BasicHeader;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.co.autotrader.traverson.conversion.ResourceConversionService;
+import uk.co.autotrader.traverson.exception.ConversionException;
 import uk.co.autotrader.traverson.http.entity.BodyFactory;
 
 import java.io.InputStream;
@@ -34,8 +32,6 @@ public class ApacheHttpUriConverterTest {
     private ResourceConversionService conversionService;
     @Mock
     private HttpEntity httpEntity;
-    @Mock
-    private CloseableHttpResponse httpResponse;
 
     @Before
     public void setUp() {
@@ -135,40 +131,53 @@ public class ApacheHttpUriConverterTest {
 
     @Test
     public void toResponse_BuildsResponseCorrectly() throws Exception {
-        HttpRequest request =  mock(HttpRequest.class);
-        URI requestUri = new URI("http://localhost");
+        var httpRequest = httpRequest("http://localhost");
+        var httpResponse = httpResponse(200, null, new BasicHeader("Location", "http://localhost/new"));
 
-        when(request.getUri()).thenReturn(requestUri);
-        when(httpResponse.getCode()).thenReturn(200);
-        when(httpResponse.getHeaders()).thenReturn(new Header[]{new BasicHeader("Location", "http://localhost/new")});
-
-
-        Response<String> response = apacheHttpUriConverter.toResponse(httpResponse, request, String.class);
+        Response<String> response = apacheHttpUriConverter.toResponse(httpResponse, httpRequest, String.class);
 
         assertThat(response).isNotNull();
-        assertThat(response.getUri()).isEqualTo(requestUri);
+        assertThat(response.getUri()).isEqualTo(new URI("http://localhost"));
         assertThat(response.getStatusCode()).isEqualTo(200);
         assertThat(response.getResource()).isNull();
+        assertThat(response.getError()).isNull();
         assertThat(response.getResponseHeaders()).containsEntry("Location", "http://localhost/new");
     }
 
     @Test
     public void toResponse_GivenResponseHasEntity_ConvertsAndSetsResource() throws Exception {
-        HttpRequest request =  mock(HttpRequest.class);
-        URI requestUri = new URI("http://localhost");
-        String expectedJson = "{'name':'test'}";
         InputStream inputStream = Mockito.mock(InputStream.class);
-
-        when(request.getUri()).thenReturn(requestUri);
-        when(httpResponse.getEntity()).thenReturn(httpEntity);
         when(httpEntity.getContent()).thenReturn(inputStream);
-        when(conversionService.convert(inputStream, String.class)).thenReturn(expectedJson);
-        when(httpResponse.getCode()).thenReturn(202);
-        when(httpResponse.getHeaders()).thenReturn(new Header[0]);
+        when(conversionService.convert(inputStream, String.class)).thenReturn("response");
 
-        Response<String> response = apacheHttpUriConverter.toResponse(httpResponse, request, String.class);
+        Response<String> response = apacheHttpUriConverter.toResponse(httpResponse(202, httpEntity), validHttpRequest(), String.class);
 
-        assertThat(response.getResource()).isEqualTo(expectedJson);
+        assertThat(response.getResource()).isEqualTo("response");
+        assertThat(response.getError()).isNull();
+    }
+
+    @Test
+    public void toResponse_GivenResponseHasEntity_AndIsErrorResponse_ConvertsAndSetsError() throws Exception {
+        InputStream inputStream = Mockito.mock(InputStream.class);
+        when(httpEntity.getContent()).thenReturn(inputStream);
+        when(conversionService.convert(inputStream, String.class)).thenReturn("error");
+
+        Response<String> response = apacheHttpUriConverter.toResponse(httpResponse(400, httpEntity), validHttpRequest(), String.class);
+
+        assertThat(response.getResource()).isNull();
+        assertThat(response.getError()).isEqualTo("error");
+    }
+
+    @Test
+    public void toResponse_GivenResponseHasEntity_AndIsErrorResponse_IgnoresConversionError() throws Exception {
+        InputStream inputStream = Mockito.mock(InputStream.class);
+        when(httpEntity.getContent()).thenReturn(inputStream);
+        when(conversionService.convert(inputStream, String.class)).thenThrow(new ConversionException(""));
+
+        Response<String> response = apacheHttpUriConverter.toResponse(httpResponse(400, httpEntity), validHttpRequest(), String.class);
+
+        assertThat(response.getResource()).isNull();
+        assertThat(response.getError()).isNull();
     }
 
     @Test
@@ -176,9 +185,31 @@ public class ApacheHttpUriConverterTest {
         HttpRequest request =  mock(HttpRequest.class);
         when(request.getUri()).thenThrow(URISyntaxException.class);
 
-        assertThatThrownBy(() -> apacheHttpUriConverter.toResponse(httpResponse, request, String.class))
+        assertThatThrownBy(() -> apacheHttpUriConverter.toResponse(null, request, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("The http request contains an invalid URI")
                 .hasCauseInstanceOf(URISyntaxException.class);
+    }
+
+    private static HttpRequest validHttpRequest() throws URISyntaxException {
+        return httpRequest("http://localhost");
+    }
+
+    private static HttpRequest httpRequest(String uri) throws URISyntaxException {
+        var request =  mock(HttpRequest.class);
+        when(request.getUri()).thenReturn(new URI(uri));
+        return request;
+    }
+
+    private static CloseableHttpResponse httpResponse(int code) {
+        return httpResponse(code, null);
+    }
+
+    private static CloseableHttpResponse httpResponse(int code, HttpEntity entity, Header... headers) {
+        var response = mock(CloseableHttpResponse.class);
+        when(response.getCode()).thenReturn(code);
+        when(response.getEntity()).thenReturn(entity);
+        when(response.getHeaders()).thenReturn(headers);
+        return response;
     }
 }
