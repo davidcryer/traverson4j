@@ -102,7 +102,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void requestBody_nonSuccessStatus_providesStringResponse() {
+    public void requestBody_nonSuccessStatus_providesError() {
         wireMockServer.stubFor(get(urlEqualTo("/path"))
                 .willReturn(WireMock.badRequest().withBody("error message")));
         Response<Integer> response = traverson.from("http://localhost:8089/path")
@@ -110,6 +110,6 @@ public class IntegrationTest {
 
         wireMockServer.verify(1, getRequestedFor(urlEqualTo("/path")));
         assertThat(response.getResource()).isNull();
-        assertThat(response.getNonSuccessResource()).isEqualTo("error message");
+        assertThat(response.getError()).isEqualTo("error message");
     }
 }

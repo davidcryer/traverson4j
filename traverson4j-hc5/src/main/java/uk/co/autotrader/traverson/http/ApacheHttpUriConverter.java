@@ -66,7 +66,7 @@ public class ApacheHttpUriConverter {
                 response.setResource(conversionService.convert(httpEntity.getContent(), returnType));
             } else {
                 try {
-                    response.setNonSuccessResource(conversionService.convert(httpEntity.getContent(), String.class));
+                    response.setError(conversionService.convert(httpEntity.getContent(), String.class));
                 } catch (ConversionException ignore) {
 
                 }

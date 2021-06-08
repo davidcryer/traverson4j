@@ -8,7 +8,7 @@ public class Response<T> {
     private int statusCode;
     private URI uri;
     private T resource;
-    private String nonSuccessResource;
+    private String error;
     private Map<String, String> responseHeaders = new HashMap<String, String>();
 
     public int getStatusCode() {
@@ -35,12 +35,12 @@ public class Response<T> {
         this.resource = resource;
     }
 
-    public String getNonSuccessResource() {
-        return nonSuccessResource;
+    public String getError() {
+        return error;
     }
 
-    public void setNonSuccessResource(String nonSuccessResource) {
-        this.nonSuccessResource = nonSuccessResource;
+    public void setError(String error) {
+        this.error = error;
     }
 
     public Map<String, String> getResponseHeaders() {
