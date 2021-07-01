@@ -17,17 +17,17 @@ public class FollowIntegrationTest {
     private static final Traverson traverson = new Traverson(new ApacheHttpTraversonClientAdapter());
 
     @BeforeClass
-    public static void beforeClass() throws Exception {
+    public static void beforeClass() {
         wireMockServer.start();
     }
 
     @AfterClass
-    public static void afterClass() throws Exception {
+    public static void afterClass() {
         wireMockServer.stop();
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         wireMockServer.resetAll();
     }
 
