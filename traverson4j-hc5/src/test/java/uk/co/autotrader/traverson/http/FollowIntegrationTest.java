@@ -13,20 +13,17 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 public class FollowIntegrationTest {
 
-    private static WireMockServer wireMockServer;
-
-    private final Traverson traverson = new Traverson(new ApacheHttpTraversonClientAdapter());
+    private static final WireMockServer wireMockServer = new WireMockServer(8089);
+    private static final Traverson traverson = new Traverson(new ApacheHttpTraversonClientAdapter());
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        wireMockServer = new WireMockServer(8089);
         wireMockServer.start();
     }
 
     @AfterClass
     public static void afterClass() throws Exception {
         wireMockServer.stop();
-        wireMockServer.resetAll();
     }
 
     @Before
@@ -140,5 +137,29 @@ public class FollowIntegrationTest {
 
         wireMockServer.verify(getRequestedFor(urlEqualTo("/")));
         wireMockServer.verify(getRequestedFor(urlEqualTo("/1")));
+    }
+
+    @Test
+    public void follow_multiple() {
+        wireMockServer.stubFor(get("/").willReturn(okJson("{\"_links\":{\"one\":{\"href\":\"http://localhost:8089/1\"}}}")
+                .withHeader("Content-Type", "application/hal+json")));
+        wireMockServer.stubFor(get("/1").willReturn(okJson("{\"_links\":{\"two\":{\"href\":\"http://localhost:8089/2\"}}}")
+                .withHeader("Content-Type", "application/hal+json")));
+        wireMockServer.stubFor(get("/2").willReturn(okJson("{\"_links\":{\"three\":{\"href\":\"http://localhost:8089/3\"}}}")
+                .withHeader("Content-Type", "application/hal+json")));
+        wireMockServer.stubFor(get("/3").willReturn(ok("success")));
+
+        var response = traverson.from("http://localhost:8089/")
+                .jsonHal()
+                .follow("one", "two", "three")
+                .get(String.class);
+
+        assertThat(response.isSuccessful()).isTrue();
+        assertThat(response.getResource()).isEqualTo("success");
+
+        wireMockServer.verify(getRequestedFor(urlEqualTo("/")));
+        wireMockServer.verify(getRequestedFor(urlEqualTo("/1")));
+        wireMockServer.verify(getRequestedFor(urlEqualTo("/2")));
+        wireMockServer.verify(getRequestedFor(urlEqualTo("/3")));
     }
 }
