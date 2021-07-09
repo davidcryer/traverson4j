@@ -1,2 +1,3 @@
 rootProject.name = 'traverson4j'
-include 'traverson4j-core','traverson4j-hc5', 'traverson4j-jackson2'
+include 'traverson4j-core','traverson4j-hc5', 'traverson4j-jackson2', 'traverson4j-test'
+

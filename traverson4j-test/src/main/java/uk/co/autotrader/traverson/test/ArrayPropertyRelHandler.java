@@ -1,4 +1,4 @@
-package uk.co.autotrader.traverson.http.utils;
+package uk.co.autotrader.traverson.test;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -20,21 +20,21 @@ class ArrayPropertyRelHandler extends RelHandler {
         var regexMatcher = REL_BY_ARRAY_PROPERTY_REGEX.matcher(rel);
         if (regexMatcher.matches()) {
 
-            var array = regexMatcher.group(0);
-            var key = regexMatcher.group(1);
-            var value = regexMatcher.group(2);
+            var array = regexMatcher.group(1);
+            var key = regexMatcher.group(2);
+            var value = regexMatcher.group(3);
             var jsonArray = new JSONArray();
             for (int i = 0; i < 2; i++) {
                 jsonArray.add(getArrayPropertyElementJsonObject(key, value + " wrong " + i, "do-not-follow-" + i));
             }
-            jsonArray.add(getArrayPropertyElementJsonObject(key, value, String.valueOf(relIndex)));
-            return String.format("{\"_embedded\":{\"%1$s\":[%2$s]},\"_links\":{\"self\":{\"href\":\"%3$s/\"}}}", array, jsonArray.toJSONString(), baseUrl);
+            jsonArray.add(getArrayPropertyElementJsonObject(key, value, String.valueOf(relIndex + 1)));
+            return String.format("{\"_embedded\":{\"%1$s\":%2$s},\"_links\":{\"self\":{\"href\":\"%3$s/\"}}}", array, jsonArray.toJSONString().replace("\\", ""), baseUrl);
         }
         return delegateToNextHandler(rel, relIndex);
     }
 
     private JSONObject getArrayPropertyElementJsonObject(String key, String value, String hrefRel) {
-        Function<String, String> jsonArrayElementProvider = s -> String.format("{\"self\":{\"href\":\"%1$s/%2$s\"}}", baseUrl, s);
+        Function<String, Object> jsonArrayElementProvider = s -> JSONObject.parse(String.format("{\"self\":{\"href\":\"%1$s/%2$s\"}}", baseUrl, s));
         var jsonElement = new JSONObject();
         jsonElement.put(key, value);
         jsonElement.put("_links", jsonArrayElementProvider.apply(hrefRel));

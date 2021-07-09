@@ -1,4 +1,4 @@
-package uk.co.autotrader.traverson.http.utils;
+package uk.co.autotrader.traverson.test;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 
@@ -6,7 +6,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 
 public class TraversonFollowTestUtil {
-
     private final WireMockServer wireMockServer;
     private final RelHandler relHandler;
 
@@ -18,7 +17,7 @@ public class TraversonFollowTestUtil {
                         new LinkRelHandler(baseUrl, null)));
     }
 
-    public void follow(String... rels) {
+    public void follow(String... rels) {//TODO return assertions runnable
         for (int i = 0; i < rels.length; ++i) {
             var rel = rels[i];
             var stubUrl = "/" + (i == 0 ? "" : String.valueOf(i));

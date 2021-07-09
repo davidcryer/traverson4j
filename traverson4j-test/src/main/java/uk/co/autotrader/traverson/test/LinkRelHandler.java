@@ -1,4 +1,4 @@
-package uk.co.autotrader.traverson.http.utils;
+package uk.co.autotrader.traverson.test;
 
 class LinkRelHandler extends RelHandler {
     private final String baseUrl;
@@ -10,6 +10,6 @@ class LinkRelHandler extends RelHandler {
 
     @Override
     String handle(String rel, int relIndex) {
-        return String.format("{\"_links\":{\"%1$s\":{\"href\":\"%2$s/%3$s\"}}}", rel, baseUrl, relIndex);
+        return String.format("{\"_links\":{\"%1$s\":{\"href\":\"%2$s/%3$s\"}}}", rel, baseUrl, relIndex + 1);
     }
 }

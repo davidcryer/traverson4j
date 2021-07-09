@@ -1,4 +1,4 @@
-package uk.co.autotrader.traverson.http.utils;
+package uk.co.autotrader.traverson.test;
 
 abstract class RelHandler {
     private final RelHandler nextHandler;
