@@ -26,7 +26,8 @@ public class TraversonFollowTestUtil {
         for (int i = 0; i < rels.length; ++i) {
             var rel = rels[i];
             var stubUrl = "/" + (i == 0 ? "" : String.valueOf(i));
-            var stubBody = relHandler.handle(rel, i);
+            var nextUrl = "/" + (i == rels.length - 1 ? "resource": String.valueOf(i + 1));
+            var stubBody = relHandler.handle(rel, nextUrl);
             wireMockServer.stubFor(get(stubUrl).willReturn(okJson(stubBody)
                     .withHeader("Content-Type", "application/hal+json")));
             requestsToVerify.add(() -> wireMockServer.verify(getRequestedFor(urlEqualTo(stubUrl))));

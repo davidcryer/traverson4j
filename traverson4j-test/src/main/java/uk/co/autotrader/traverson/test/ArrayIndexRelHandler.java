@@ -16,19 +16,19 @@ class ArrayIndexRelHandler extends RelHandler {
     }
 
     @Override
-    String handle(String rel, int relIndex) {
+    String handle(String rel, String nextUrl) {
         var regexMatcher = REL_BY_ARRAY_INDEX_REGEX.matcher(rel);
         if (regexMatcher.matches()) {
-            Function<String, Object> jsonArrayElementProvider = s -> JSONObject.parse(String.format("{\"href\":\"%1$s/%2$s\"}", baseUrl, s));
+            Function<String, Object> jsonArrayElementProvider = s -> JSONObject.parse(String.format("{\"href\":\"%1$s%2$s\"}", baseUrl, s));
             var array = regexMatcher.group(1);
             var index = Integer.parseInt(regexMatcher.group(2));
             var jsonArray = new JSONArray();
             for (int i = 0; i < index; i++) {
-                jsonArray.add(jsonArrayElementProvider.apply("do-not-follow-" + i));
+                jsonArray.add(jsonArrayElementProvider.apply("/do-not-follow-" + i));
             }
-            jsonArray.add(jsonArrayElementProvider.apply(String.valueOf(relIndex + 1)));
+            jsonArray.add(jsonArrayElementProvider.apply(nextUrl));
             return String.format("{\"_links\":{\"%1$s\":%2$s}}", array, jsonArray.toJSONString());
         }
-        return delegateToNextHandler(rel, relIndex);
+        return delegateToNextHandler(rel, nextUrl);
     }
 }

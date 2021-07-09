@@ -16,7 +16,7 @@ class ArrayPropertyRelHandler extends RelHandler {
     }
 
     @Override
-    String handle(String rel, int relIndex) {
+    String handle(String rel, String nextUrl) {
         var regexMatcher = REL_BY_ARRAY_PROPERTY_REGEX.matcher(rel);
         if (regexMatcher.matches()) {
 
@@ -25,16 +25,16 @@ class ArrayPropertyRelHandler extends RelHandler {
             var value = regexMatcher.group(3);
             var jsonArray = new JSONArray();
             for (int i = 0; i < 2; i++) {
-                jsonArray.add(getArrayPropertyElementJsonObject(key, value + " wrong " + i, "do-not-follow-" + i));
+                jsonArray.add(getArrayPropertyElementJsonObject(key, value + " wrong " + i, "/do-not-follow-" + i));
             }
-            jsonArray.add(getArrayPropertyElementJsonObject(key, value, String.valueOf(relIndex + 1)));
-            return String.format("{\"_embedded\":{\"%1$s\":%2$s},\"_links\":{\"self\":{\"href\":\"%3$s/\"}}}", array, jsonArray.toJSONString().replace("\\", ""), baseUrl);
+            jsonArray.add(getArrayPropertyElementJsonObject(key, value, nextUrl));
+            return String.format("{\"_embedded\":{\"%1$s\":%2$s},\"_links\":{\"self\":{\"href\":\"%3$s/\"}}}", array, jsonArray.toJSONString(), baseUrl);
         }
-        return delegateToNextHandler(rel, relIndex);
+        return delegateToNextHandler(rel, nextUrl);
     }
 
     private JSONObject getArrayPropertyElementJsonObject(String key, String value, String hrefRel) {
-        Function<String, Object> jsonArrayElementProvider = s -> JSONObject.parse(String.format("{\"self\":{\"href\":\"%1$s/%2$s\"}}", baseUrl, s));
+        Function<String, Object> jsonArrayElementProvider = s -> JSONObject.parse(String.format("{\"self\":{\"href\":\"%1$s%2$s\"}}", baseUrl, s));
         var jsonElement = new JSONObject();
         jsonElement.put(key, value);
         jsonElement.put("_links", jsonArrayElementProvider.apply(hrefRel));

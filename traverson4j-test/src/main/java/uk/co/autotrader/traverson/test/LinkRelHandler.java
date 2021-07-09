@@ -9,7 +9,7 @@ class LinkRelHandler extends RelHandler {
     }
 
     @Override
-    String handle(String rel, int relIndex) {
-        return String.format("{\"_links\":{\"%1$s\":{\"href\":\"%2$s/%3$s\"}}}", rel, baseUrl, relIndex + 1);
+    String handle(String rel, String nextUrl) {
+        return String.format("{\"_links\":{\"%1$s\":{\"href\":\"%2$s%3$s\"}}}", rel, baseUrl, nextUrl);
     }
 }
