@@ -33,7 +33,7 @@ public class TraversonFollowTestUtilIntegrationTest {
 
     @Test
     public void follow_single_linksRel() {
-        traversonFollowTestUtil.follow("one");
+        var followVerification = traversonFollowTestUtil.follow("one");
         wireMockServer.stubFor(get("/1").willReturn(ok("success")));
 
         var response = traverson.from("http://localhost:8089/")
@@ -44,7 +44,8 @@ public class TraversonFollowTestUtilIntegrationTest {
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.getResource()).isEqualTo("success");
 
-        wireMockServer.verify(getRequestedFor(urlEqualTo("/")));
+        followVerification.verifyFollowsCalled();//TODO this
+        traversonFollowTestUtil.verifyFollowsCalled(1);//TODO or this?
         wireMockServer.verify(getRequestedFor(urlEqualTo("/1")));
     }
 
@@ -61,7 +62,7 @@ public class TraversonFollowTestUtilIntegrationTest {
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.getResource()).isEqualTo("success");
 
-        wireMockServer.verify(getRequestedFor(urlEqualTo("/")));
+        traversonFollowTestUtil.verifyFollowsCalled(1);
         wireMockServer.verify(getRequestedFor(urlEqualTo("/1")));
     }
 
@@ -78,7 +79,7 @@ public class TraversonFollowTestUtilIntegrationTest {
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.getResource()).isEqualTo("success");
 
-        wireMockServer.verify(getRequestedFor(urlEqualTo("/")));
+        traversonFollowTestUtil.verifyFollowsCalled(1);
         wireMockServer.verify(getRequestedFor(urlEqualTo("/1")));
     }
 
@@ -95,7 +96,8 @@ public class TraversonFollowTestUtilIntegrationTest {
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.getResource()).isEqualTo("success");
 
-        wireMockServer.verify(getRequestedFor(urlEqualTo("/")));
+
+        traversonFollowTestUtil.verifyFollowsCalled(1);
         wireMockServer.verify(getRequestedFor(urlEqualTo("/1")));
     }
 
@@ -112,7 +114,7 @@ public class TraversonFollowTestUtilIntegrationTest {
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.getResource()).isEqualTo("success");
 
-        wireMockServer.verify(getRequestedFor(urlEqualTo("/")));
+        traversonFollowTestUtil.verifyFollowsCalled(1);
         wireMockServer.verify(getRequestedFor(urlEqualTo("/1")));
     }
 
@@ -129,7 +131,7 @@ public class TraversonFollowTestUtilIntegrationTest {
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.getResource()).isEqualTo("success");
 
-        wireMockServer.verify(getRequestedFor(urlEqualTo("/")));
+        traversonFollowTestUtil.verifyFollowsCalled(1);
         wireMockServer.verify(getRequestedFor(urlEqualTo("/1")));
     }
 
@@ -146,9 +148,7 @@ public class TraversonFollowTestUtilIntegrationTest {
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.getResource()).isEqualTo("success");
 
-        wireMockServer.verify(getRequestedFor(urlEqualTo("/")));
-        wireMockServer.verify(getRequestedFor(urlEqualTo("/1")));
-        wireMockServer.verify(getRequestedFor(urlEqualTo("/2")));
+        traversonFollowTestUtil.verifyFollowsCalled(3);
         wireMockServer.verify(getRequestedFor(urlEqualTo("/3")));
     }
 }
