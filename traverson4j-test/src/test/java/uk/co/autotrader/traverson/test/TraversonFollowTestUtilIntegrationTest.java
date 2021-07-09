@@ -11,7 +11,7 @@ import uk.co.autotrader.traverson.http.ApacheHttpTraversonClientAdapter;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TraversonFollowIntegrationTest {
+public class TraversonFollowTestUtilIntegrationTest {
     private static final WireMockServer wireMockServer = new WireMockServer(8089);
     private static final Traverson traverson = new Traverson(new ApacheHttpTraversonClientAdapter());
     private final TraversonFollowTestUtil traversonFollowTestUtil = new TraversonFollowTestUtil(wireMockServer);

@@ -17,7 +17,10 @@ public class TraversonFollowTestUtil {
                         new LinkRelHandler(baseUrl, null)));
     }
 
-    public void follow(String... rels) {//TODO return assertions runnable
+    public void follow(String... rels) {
+        //TODO return assertions runnable
+        //TODO consider multiple follows registered on same wiremock server - maybe introduce a base path to work off of for each follow setup
+        //TODO last href pointing to endpoint like .../final rather than an integer (i.e .../3)
         for (int i = 0; i < rels.length; ++i) {
             var rel = rels[i];
             var stubUrl = "/" + (i == 0 ? "" : String.valueOf(i));
