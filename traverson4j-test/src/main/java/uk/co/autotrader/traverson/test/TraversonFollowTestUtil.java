@@ -21,6 +21,10 @@ public class TraversonFollowTestUtil {
 
     public FollowVerification follow(String... rels) {
         //TODO consider multiple follows registered on same wiremock server - maybe introduce a base path to work off of for each follow setup
+        // needs more consideration. Ordinarily would use scenarios for stateful wiremock behaviour, but, as both traverson
+        // calls would be made in same line invocation in test, this is not possible.
+        // Solution would probably be library user-side to have the requests go to separate servers during testing,
+        // even if they would go to the same service when the app is deployed.
         var requestsToVerify = new ArrayList<Runnable>();
         for (int i = 0; i < rels.length; ++i) {
             var rel = rels[i];
