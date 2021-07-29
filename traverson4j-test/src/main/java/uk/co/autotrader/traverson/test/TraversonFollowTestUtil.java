@@ -31,7 +31,7 @@ public class TraversonFollowTestUtil {
             var stubUrl = "/" + (i == 0 ? "" : String.valueOf(i));
             var nextUrl = "/" + (i == rels.length - 1 ? "resource": String.valueOf(i + 1));
             var stubBody = relHandler.handle(rel, nextUrl);
-            wireMockServer.stubFor(get(stubUrl).willReturn(okJson(stubBody)
+            wireMockServer.stubFor(get(urlPathEqualTo(stubUrl)).willReturn(okJson(stubBody)
                     .withHeader("Content-Type", "application/hal+json")));
             requestsToVerify.add(() -> wireMockServer.verify(getRequestedFor(urlEqualTo(stubUrl))));
         }
@@ -41,7 +41,7 @@ public class TraversonFollowTestUtil {
     public void verifyFollowsCalled(int followChainLength) {
         for (int i = 0; i < followChainLength; i++) {
             var url = "/" + (i == 0 ? "" : String.valueOf(i));
-            wireMockServer.verify(getRequestedFor(urlEqualTo(url)));
+            wireMockServer.verify(getRequestedFor(urlPathEqualTo(url)));
         }
     }
 }

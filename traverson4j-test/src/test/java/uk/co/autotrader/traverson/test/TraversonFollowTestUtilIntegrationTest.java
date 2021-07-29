@@ -136,6 +136,24 @@ public class TraversonFollowTestUtilIntegrationTest {
     }
 
     @Test
+    public void follow_withQueryParam() {
+        traversonFollowTestUtil.follow("one");
+        wireMockServer.stubFor(get("/resource?k=v").willReturn(ok("success")));
+
+        var response = traverson.from("http://localhost:8089/")
+                .jsonHal()
+                .follow("one")
+                .withQueryParam("k", "v")
+                .get(String.class);
+
+        assertThat(response.isSuccessful()).isTrue();
+        assertThat(response.getResource()).isEqualTo("success");
+
+        traversonFollowTestUtil.verifyFollowsCalled(1);
+        wireMockServer.verify(getRequestedFor(urlEqualTo("/resource?k=v")));
+    }
+
+    @Test
     public void follow_multiple() {
         traversonFollowTestUtil.follow("one", "two", "three");
         wireMockServer.stubFor(get("/resource").willReturn(ok("success")));
