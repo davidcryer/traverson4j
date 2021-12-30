@@ -8,15 +8,13 @@ import java.util.regex.Pattern;
 
 class ArrayIndexRelHandler extends RelHandler {
     private static final Pattern REL_BY_ARRAY_INDEX_REGEX = Pattern.compile("(.*)\\[(\\d+)\\]");
-    private final String baseUrl;
 
-    ArrayIndexRelHandler(String baseUrl, RelHandler nextHandler) {
+    ArrayIndexRelHandler(RelHandler nextHandler) {
         super(nextHandler);
-        this.baseUrl = baseUrl;
     }
 
     @Override
-    String handle(String rel, String nextUrl) {
+    String handle(String baseUrl, String rel, String nextUrl) {
         var regexMatcher = REL_BY_ARRAY_INDEX_REGEX.matcher(rel);
         if (regexMatcher.matches()) {
             Function<String, Object> jsonArrayElementProvider = s -> JSONObject.parse(String.format("{\"href\":\"%1$s%2$s\"}", baseUrl, s));
@@ -29,6 +27,6 @@ class ArrayIndexRelHandler extends RelHandler {
             jsonArray.add(jsonArrayElementProvider.apply(nextUrl));
             return String.format("{\"_links\":{\"%1$s\":%2$s}}", array, jsonArray.toJSONString());
         }
-        return delegateToNextHandler(rel, nextUrl);
+        return delegateToNextHandler(baseUrl, rel, nextUrl);
     }
 }

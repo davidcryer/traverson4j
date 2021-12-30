@@ -15,7 +15,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class TraversonFollowTestUtilIntegrationTest {
     private static final WireMockServer wireMockServer = new WireMockServer(8089);
     private static final Traverson traverson = new Traverson(new ApacheHttpTraversonClientAdapter());
-    private final TraversonWiremockUtils traversonWiremockUtils = new TraversonWiremockUtils(wireMockServer);
 
     @BeforeClass
     public static void beforeClass() {
@@ -34,7 +33,7 @@ public class TraversonFollowTestUtilIntegrationTest {
 
     @Test
     public void follow_single_linksRel() {
-        var followVerification = traversonWiremockUtils.follow("one");
+        var followVerification = TraversonWiremockUtils.follow(wireMockServer, "one");
         wireMockServer.stubFor(get("/resource").willReturn(ok("success")));
 
         var response = traverson.from("http://localhost:8089/")
@@ -46,13 +45,13 @@ public class TraversonFollowTestUtilIntegrationTest {
         assertThat(response.getResource()).isEqualTo("success");
 
         followVerification.verifyFollowsCalled();//TODO this
-        traversonWiremockUtils.verifyFollowsCalled(1);//TODO or this?
+        TraversonWiremockUtils.verifyFollowsCalled(wireMockServer, 1);//TODO or this?
         wireMockServer.verify(getRequestedFor(urlEqualTo("/resource")));
     }
 
     @Test
     public void follow_single_embeddedArrayName() {
-        traversonWiremockUtils.follow("one");
+        TraversonWiremockUtils.follow(wireMockServer, "one");
         wireMockServer.stubFor(get("/resource").willReturn(ok("success")));
 
         var response = traverson.from("http://localhost:8089/")
@@ -63,13 +62,13 @@ public class TraversonFollowTestUtilIntegrationTest {
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.getResource()).isEqualTo("success");
 
-        traversonWiremockUtils.verifyFollowsCalled(1);
+        TraversonWiremockUtils.verifyFollowsCalled(wireMockServer, 1);
         wireMockServer.verify(getRequestedFor(urlEqualTo("/resource")));
     }
 
     @Test
     public void follow_single_relByArrayProperty_embedded() {
-        traversonWiremockUtils.follow("array[prop:one]");
+        TraversonWiremockUtils.follow(wireMockServer, "array[prop:one]");
         wireMockServer.stubFor(get("/resource").willReturn(ok("success")));
 
         var response = traverson.from("http://localhost:8089/")
@@ -80,13 +79,13 @@ public class TraversonFollowTestUtilIntegrationTest {
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.getResource()).isEqualTo("success");
 
-        traversonWiremockUtils.verifyFollowsCalled(1);
+        TraversonWiremockUtils.verifyFollowsCalled(wireMockServer, 1);
         wireMockServer.verify(getRequestedFor(urlEqualTo("/resource")));
     }
 
     @Test
     public void follow_single_relByArrayProperty_links() {
-        traversonWiremockUtils.follow("array[prop:one]");
+        TraversonWiremockUtils.follow(wireMockServer, "array[prop:one]");
         wireMockServer.stubFor(get("/resource").willReturn(ok("success")));
 
         var response = traverson.from("http://localhost:8089/")
@@ -98,13 +97,13 @@ public class TraversonFollowTestUtilIntegrationTest {
         assertThat(response.getResource()).isEqualTo("success");
 
 
-        traversonWiremockUtils.verifyFollowsCalled(1);
+        TraversonWiremockUtils.verifyFollowsCalled(wireMockServer, 1);
         wireMockServer.verify(getRequestedFor(urlEqualTo("/resource")));
     }
 
     @Test
     public void follow_single_relByArrayIndex_embedded() {
-        traversonWiremockUtils.follow("array[0]");
+        TraversonWiremockUtils.follow(wireMockServer, "array[0]");
         wireMockServer.stubFor(get("/resource").willReturn(ok("success")));
 
         var response = traverson.from("http://localhost:8089/")
@@ -115,13 +114,13 @@ public class TraversonFollowTestUtilIntegrationTest {
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.getResource()).isEqualTo("success");
 
-        traversonWiremockUtils.verifyFollowsCalled(1);
+        TraversonWiremockUtils.verifyFollowsCalled(wireMockServer, 1);
         wireMockServer.verify(getRequestedFor(urlEqualTo("/resource")));
     }
 
     @Test
     public void follow_single_relByArrayIndex_links() {
-        traversonWiremockUtils.follow("array[0]");
+        TraversonWiremockUtils.follow(wireMockServer, "array[0]");
         wireMockServer.stubFor(get("/resource").willReturn(ok("success")));
 
         var response = traverson.from("http://localhost:8089/")
@@ -132,13 +131,13 @@ public class TraversonFollowTestUtilIntegrationTest {
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.getResource()).isEqualTo("success");
 
-        traversonWiremockUtils.verifyFollowsCalled(1);
+        TraversonWiremockUtils.verifyFollowsCalled(wireMockServer, 1);
         wireMockServer.verify(getRequestedFor(urlEqualTo("/resource")));
     }
 
     @Test
     public void follow_withQueryParam() {
-        traversonWiremockUtils.follow("one");
+        TraversonWiremockUtils.follow(wireMockServer, "one");
         wireMockServer.stubFor(get("/resource?k=v").willReturn(ok("success")));
 
         var response = traverson.from("http://localhost:8089/")
@@ -150,13 +149,13 @@ public class TraversonFollowTestUtilIntegrationTest {
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.getResource()).isEqualTo("success");
 
-        traversonWiremockUtils.verifyFollowsCalled(1);
+        TraversonWiremockUtils.verifyFollowsCalled(wireMockServer, 1);
         wireMockServer.verify(getRequestedFor(urlEqualTo("/resource?k=v")));
     }
 
     @Test
     public void follow_multiple() {
-        traversonWiremockUtils.follow("one", "two", "three");
+        TraversonWiremockUtils.follow(wireMockServer, "one", "two", "three");
         wireMockServer.stubFor(get("/resource").willReturn(ok("success")));
 
         var response = traverson.from("http://localhost:8089/")
@@ -167,7 +166,7 @@ public class TraversonFollowTestUtilIntegrationTest {
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.getResource()).isEqualTo("success");
 
-        traversonWiremockUtils.verifyFollowsCalled(3);
+        TraversonWiremockUtils.verifyFollowsCalled(wireMockServer, 3);
         wireMockServer.verify(getRequestedFor(urlEqualTo("/resource")));
     }
 }

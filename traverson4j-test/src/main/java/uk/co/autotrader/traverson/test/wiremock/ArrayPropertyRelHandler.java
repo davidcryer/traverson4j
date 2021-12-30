@@ -8,15 +8,13 @@ import java.util.regex.Pattern;
 
 class ArrayPropertyRelHandler extends RelHandler {
     private static final Pattern REL_BY_ARRAY_PROPERTY_REGEX = Pattern.compile("(.*)\\[(.*):(.*)\\]");
-    private final String baseUrl;
 
-    ArrayPropertyRelHandler(String baseUrl, RelHandler nextHandler) {
+    ArrayPropertyRelHandler(RelHandler nextHandler) {
         super(nextHandler);
-        this.baseUrl = baseUrl;
     }
 
     @Override
-    String handle(String rel, String nextUrl) {
+    String handle(String baseUrl, String rel, String nextUrl) {
         var regexMatcher = REL_BY_ARRAY_PROPERTY_REGEX.matcher(rel);
         if (regexMatcher.matches()) {
 
@@ -25,15 +23,15 @@ class ArrayPropertyRelHandler extends RelHandler {
             var value = regexMatcher.group(3);
             var jsonArray = new JSONArray();
             for (int i = 0; i < 2; i++) {
-                jsonArray.add(getArrayPropertyElementJsonObject(key, value + " wrong " + i, "/do-not-follow-" + i));
+                jsonArray.add(getArrayPropertyElementJsonObject(key, value + " wrong " + i, baseUrl, "/do-not-follow-" + i));
             }
-            jsonArray.add(getArrayPropertyElementJsonObject(key, value, nextUrl));
+            jsonArray.add(getArrayPropertyElementJsonObject(key, value, baseUrl, nextUrl));
             return String.format("{\"_embedded\":{\"%1$s\":%2$s},\"_links\":{\"self\":{\"href\":\"%3$s/\"}}}", array, jsonArray.toJSONString(), baseUrl);
         }
-        return delegateToNextHandler(rel, nextUrl);
+        return delegateToNextHandler(baseUrl, rel, nextUrl);
     }
 
-    private JSONObject getArrayPropertyElementJsonObject(String key, String value, String hrefRel) {
+    private JSONObject getArrayPropertyElementJsonObject(String key, String value, String baseUrl, String hrefRel) {
         Function<String, Object> jsonArrayElementProvider = s -> JSONObject.parse(String.format("{\"self\":{\"href\":\"%1$s%2$s\"}}", baseUrl, s));
         var jsonElement = new JSONObject();
         jsonElement.put(key, value);

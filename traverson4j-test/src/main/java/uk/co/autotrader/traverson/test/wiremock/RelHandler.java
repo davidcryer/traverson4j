@@ -7,11 +7,11 @@ abstract class RelHandler {
         this.nextHandler = nextHandler;
     }
 
-    abstract String handle(String rel, String nextUrl);
+    abstract String handle(String baseUrl, String rel, String nextUrl);
 
-    String delegateToNextHandler(String rel, String nextUrl) {
+    String delegateToNextHandler(String baseUrl, String rel, String nextUrl) {
         if (nextHandler != null) {
-            return nextHandler.handle(rel, nextUrl);
+            return nextHandler.handle(baseUrl, rel, nextUrl);
         }
         throw new IllegalArgumentException(String.format("Rel \"%s\" has not been handled. Make sure it has been correctly formatted", rel));
     }

@@ -7,19 +7,11 @@ import java.util.ArrayList;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 public class TraversonWiremockUtils {
-    private final WireMockServer wireMockServer;
-    private final RelHandler relHandler;
+    private static final RelHandler relHandler = new ArrayIndexRelHandler(
+            new ArrayPropertyRelHandler(
+                    new LinkRelHandler(null)));
 
-    public TraversonWiremockUtils(WireMockServer wireMockServer) {
-        this.wireMockServer = wireMockServer;
-        var baseUrl = wireMockServer.baseUrl();
-        relHandler = new ArrayIndexRelHandler(baseUrl,
-                new ArrayPropertyRelHandler(baseUrl,
-                        new LinkRelHandler(baseUrl, null)));
-    }
-    //TODO decide on follow() return or separate method for follow wiremock verifications
-
-    public FollowVerification follow(String... rels) {
+    public static FollowVerification follow(WireMockServer server, String... rels) {
         //TODO consider multiple follows registered on same wiremock server - maybe introduce a base path to work off of for each follow setup
         // needs more consideration. Ordinarily would use scenarios for stateful wiremock behaviour, but, as both traverson
         // calls would be made in same line invocation in test, this is not possible.
@@ -30,18 +22,18 @@ public class TraversonWiremockUtils {
             var rel = rels[i];
             var stubUrl = "/" + (i == 0 ? "" : String.valueOf(i));
             var nextUrl = "/" + (i == rels.length - 1 ? "resource": String.valueOf(i + 1));
-            var stubBody = relHandler.handle(rel, nextUrl);
-            wireMockServer.stubFor(get(urlPathEqualTo(stubUrl)).willReturn(okJson(stubBody)
+            var stubBody = relHandler.handle(server.baseUrl(), rel, nextUrl);
+            server.stubFor(get(urlPathEqualTo(stubUrl)).willReturn(okJson(stubBody)
                     .withHeader("Content-Type", "application/hal+json")));
-            requestsToVerify.add(() -> wireMockServer.verify(getRequestedFor(urlEqualTo(stubUrl))));
+            requestsToVerify.add(() -> server.verify(getRequestedFor(urlEqualTo(stubUrl))));
         }
         return () -> requestsToVerify.forEach(Runnable::run);
     }
 
-    public void verifyFollowsCalled(int followChainLength) {
+    public static void verifyFollowsCalled(WireMockServer server, int followChainLength) {
         for (int i = 0; i < followChainLength; i++) {
             var url = "/" + (i == 0 ? "" : String.valueOf(i));
-            wireMockServer.verify(getRequestedFor(urlPathEqualTo(url)));
+            server.verify(getRequestedFor(urlPathEqualTo(url)));
         }
     }
 }
