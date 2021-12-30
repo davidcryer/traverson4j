@@ -9,6 +9,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import uk.co.autotrader.traverson.Traverson;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -35,6 +37,32 @@ public class IntegrationTest {
     @Before
     public void setUp() throws Exception {
         wireMockServer.resetAll();
+    }
+
+    @Test
+    public void inputStream_allowsClientsToRequestTheBodyAsInputStreamWithoutClosingTheHttpConnection() throws IOException {
+        String htmlBody = "<html></html>";
+        wireMockServer.stubFor(get(urlEqualTo("/"))
+                .willReturn(WireMock.status(200).withBody(htmlBody)));
+
+        Response<String> response = traverson.from("http://localhost:8089")
+                .withHeader("Accept", "content-type")
+                .get(String.class);
+
+        assertThat(response.getResource()).isEqualTo(htmlBody);
+        wireMockServer.verify(getRequestedFor(urlPathEqualTo("/"))
+                .withHeader("Accept", equalTo("content-type")));
+    }
+
+    @Test
+    public void acceptHeaderCanBeSet() throws IOException {
+        String htmlBody = "<html></html>";
+        wireMockServer.stubFor(get(urlEqualTo("/")).willReturn(WireMock.status(200).withBody(htmlBody)));
+
+        Response<InputStream> response = traverson.from("http://localhost:8089").get(InputStream.class);
+        try (InputStream inputStream = response.getResource()) {
+            assertThat(inputStream.readAllBytes()).isEqualTo(htmlBody.getBytes(StandardCharsets.UTF_8));
+        }
     }
 
     @Test
