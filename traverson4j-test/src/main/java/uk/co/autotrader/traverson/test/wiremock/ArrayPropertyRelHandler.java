@@ -1,4 +1,4 @@
-package uk.co.autotrader.traverson.test;
+package uk.co.autotrader.traverson.test.wiremock;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;

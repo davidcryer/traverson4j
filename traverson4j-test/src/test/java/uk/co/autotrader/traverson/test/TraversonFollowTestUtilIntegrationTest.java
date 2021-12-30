@@ -7,6 +7,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import uk.co.autotrader.traverson.Traverson;
 import uk.co.autotrader.traverson.http.ApacheHttpTraversonClientAdapter;
+import uk.co.autotrader.traverson.test.wiremock.TraversonFollowTestUtil;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;

@@ -1,4 +1,4 @@
-package uk.co.autotrader.traverson.test;
+package uk.co.autotrader.traverson.test.wiremock;
 
 abstract class RelHandler {
     private final RelHandler nextHandler;
