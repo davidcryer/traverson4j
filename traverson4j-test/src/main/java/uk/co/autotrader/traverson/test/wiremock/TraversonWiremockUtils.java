@@ -6,11 +6,11 @@ import java.util.ArrayList;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
-public class TraversonFollowTestUtil {
+public class TraversonWiremockUtils {
     private final WireMockServer wireMockServer;
     private final RelHandler relHandler;
 
-    public TraversonFollowTestUtil(WireMockServer wireMockServer) {
+    public TraversonWiremockUtils(WireMockServer wireMockServer) {
         this.wireMockServer = wireMockServer;
         var baseUrl = wireMockServer.baseUrl();
         relHandler = new ArrayIndexRelHandler(baseUrl,
