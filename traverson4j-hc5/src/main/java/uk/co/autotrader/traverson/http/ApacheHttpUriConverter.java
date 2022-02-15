@@ -65,11 +65,7 @@ public class ApacheHttpUriConverter {
             if (httpResponse.getCode() >= 200 && httpResponse.getCode() < 300) {
                 response.setResource(conversionService.convert(httpEntity.getContent(), returnType));
             } else {
-                try {
-                    response.setError(conversionService.convert(httpEntity.getContent(), String.class));
-                } catch (ConversionException ignore) {
-
-                }
+                response.setError(conversionService.convert(httpEntity.getContent(), String.class));
             }
         }
         return response;

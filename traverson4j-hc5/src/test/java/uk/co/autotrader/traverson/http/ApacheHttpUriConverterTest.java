@@ -169,18 +169,6 @@ public class ApacheHttpUriConverterTest {
     }
 
     @Test
-    public void toResponse_GivenResponseHasEntity_AndIsErrorResponse_IgnoresConversionError() throws Exception {
-        InputStream inputStream = Mockito.mock(InputStream.class);
-        when(httpEntity.getContent()).thenReturn(inputStream);
-        when(conversionService.convert(inputStream, String.class)).thenThrow(new ConversionException(""));
-
-        Response<String> response = apacheHttpUriConverter.toResponse(httpResponse(400, httpEntity), validHttpRequest(), String.class);
-
-        assertThat(response.getResource()).isNull();
-        assertThat(response.getError()).isNull();
-    }
-
-    @Test
     public void toResponse_throwsIllegalArgumentExceptionForAnInvalidURI() throws URISyntaxException {
         HttpRequest request =  mock(HttpRequest.class);
         when(request.getUri()).thenThrow(URISyntaxException.class);

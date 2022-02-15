@@ -8,12 +8,14 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import uk.co.autotrader.traverson.Traverson;
+import uk.co.autotrader.traverson.exception.IncompleteTraversalException;
 
 import java.nio.charset.StandardCharsets;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class IntegrationTest {
     private static WireMockServer wireMockServer;
@@ -111,5 +113,13 @@ public class IntegrationTest {
         wireMockServer.verify(1, getRequestedFor(urlEqualTo("/path")));
         assertThat(response.getResource()).isNull();
         assertThat(response.getError()).isEqualTo("error message");
+    }
+
+    @Test
+    public void incompleteTraversalException_thrownWhenFollowFails() {
+        assertThatThrownBy(() -> traverson.from("http://localhost:8089/")
+                    .follow("final")
+                    .get()
+        ).isInstanceOf(IncompleteTraversalException.class);
     }
 }
