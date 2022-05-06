@@ -128,16 +128,13 @@ public class IntegrationTest {
     public void requestBody_get_deserializedToObject() {
         wireMockServer.stubFor(get(urlEqualTo("/path"))
                 .willReturn(ok().withBody("{\"key\":\"value\"}")));
-        var didCheck = traverson.from("http://localhost:8089/path")
+        var resource = traverson.from("http://localhost:8089/path")
                 .get(response -> {
                     wireMockServer.verify(1, getRequestedFor(urlEqualTo("/path")));
 
-                    TestResource resource = response.getResource(TestResource.class);
-
-                    assertThat(resource).isEqualTo(new TestResource("value"));
-                    return true;
+                    return response.getResource(TestResource.class);
                 });
-        assertThat(didCheck).isTrue();
+        assertThat(resource).isEqualTo(new TestResource("value"));
     }
 
     public static class TestResource {
