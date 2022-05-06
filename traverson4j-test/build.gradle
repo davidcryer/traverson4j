@@ -1,0 +1,3 @@
+dependencies {
+    testImplementation "com.github.tomakehurst:wiremock-jre8:2.27.0"
+}

@@ -153,3 +153,11 @@ project(':traverson4j-jackson2') {
         api project(':traverson4j-core')
     }
 }
+
+project(':traverson4j-test') {
+    dependencies {
+        api project(':traverson4j-core')
+        api project(':traverson4j-hc5')
+        api project(':traverson4j-jackson2')
+    }
+}

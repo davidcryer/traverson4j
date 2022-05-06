@@ -1,15 +1,17 @@
-package uk.co.autotrader.traverson.http;
+package uk.co.autotrader.traverson;
 
-import com.alibaba.fastjson.JSONObject;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import uk.co.autotrader.traverson.Traverson;
+import uk.co.autotrader.traverson.http.ApacheHttpTraversonClientAdapter;
+import uk.co.autotrader.traverson.http.SimpleMultipartBody;
+import uk.co.autotrader.traverson.http.TextBody;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
@@ -40,7 +42,7 @@ public class IntegrationTest {
     @Test
     public void requestBody_SimpleTextBodyIsSerializedAndPostedCorrectly() {
         wireMockServer.stubFor(patch(urlEqualTo("/records/1"))
-                .willReturn(WireMock.status(202)));
+                .willReturn(status(202)));
         var didCheck = traverson.from("http://localhost:8089/records/1")
                 .patch(new TextBody("{\"key\":123}", "application/json", StandardCharsets.UTF_8), response -> {
                     wireMockServer.verify(1, patchRequestedFor(urlEqualTo("/records/1")).withRequestBody(equalToJson("{\"key\":123}")));
@@ -120,5 +122,53 @@ public class IntegrationTest {
                     return true;
                 });
         assertThat(didCheck).isTrue();
+    }
+
+    @Test
+    public void requestBody_get_deserializedToObject() {
+        wireMockServer.stubFor(get(urlEqualTo("/path"))
+                .willReturn(ok().withBody("{\"key\":\"value\"}")));
+        var didCheck = traverson.from("http://localhost:8089/path")
+                .get(response -> {
+                    wireMockServer.verify(1, getRequestedFor(urlEqualTo("/path")));
+
+                    TestResource resource = response.getResource(TestResource.class);
+
+                    assertThat(resource).isEqualTo(new TestResource("value"));
+                    return true;
+                });
+        assertThat(didCheck).isTrue();
+    }
+
+    public static class TestResource {
+        private String key;
+
+        public TestResource() {
+        }
+
+        public TestResource(String key) {
+            this.key = key;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public void setKey(String key) {
+            this.key = key;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            TestResource that = (TestResource) o;
+            return Objects.equals(key, that.key);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(key);
+        }
     }
 }
